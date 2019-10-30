@@ -1,1 +1,1 @@
-# Bouncing-Sphere-Simulator
+# Bouncing Sphere Simulator
