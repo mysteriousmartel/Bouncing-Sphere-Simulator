@@ -26,3 +26,17 @@ class Ball():
     dt = float(Decimal(t) - Decimal(self.time))
     self.pos += dt * self.vel
     self.time = t
+
+    
+    # Universe Class
+    
+      #constructor
+      #collision checker
+      #collision time
+      #collisions 
+      #update ball position
+      #update ball velocity
+      #update time
+      
+    
+    
