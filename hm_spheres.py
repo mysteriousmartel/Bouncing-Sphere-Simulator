@@ -1,11 +1,3 @@
-import numpy as np
-import sys, os
-from decimal import Decimal
-import copy
-import math
-from timeit import default_timer as timer
-
-
 class Ball():
   def __init__(self, mass, radius, name, pos=[], vel=[]):
     self.mass = mass
@@ -67,12 +59,7 @@ class Universe():
         print("At time ", t)
         
         
-    def collision_time():
-    #collision time
-    
-    def collisions():
-    #collisions    
-        
+       
     
     def update_pos(self, t):
     #update all ball positions
@@ -80,7 +67,7 @@ class Universe():
 		ball.updatepos(t)
     
         
-    def update_vel(self, ball1, ball2,t):
+    def collision(self, ball1, ball2,t):
     #update ball velocity
     p1, p2= ball1.pos, ball2.pos
     v1, v2= ball1.vel, ball2.vel
@@ -105,9 +92,3 @@ class Universe():
     print(ball1,"'s new velocity is ", ball1.vel)
     print(ball2,"'s new velocity is ", ball2.vel)
     print("At time ", t)
-    
-    
-    
-    def update_time():
-    #update time
-        
