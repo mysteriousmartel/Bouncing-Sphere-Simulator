@@ -1,11 +1,3 @@
-import numpy as np
-import sys, os
-from decimal import Decimal
-import copy
-import math
-from timeit import default_timer as timer
-
-
 class Ball():
   def __init__(self, mass, radius, name, pos=[], vel=[]):
     self.mass = mass
@@ -33,14 +25,35 @@ class Universe():
         self.ball_array=copy.deepcopy(ball_array)
         self.time = 0.00000000
         
-    def iscollision(auto=True):
-    #collision checker
+    def __repr__(self):
+		str_out = str(self.time) + "\n"
+		for i in range(len(self.ball_list)):
+			str_out += str(self.ball_list[i].name)+" "+str(self.ball_list[i].pos)[1:-1] 
+									+" "+str(self.ball_list[i].vel)[1:-1]
+			if i != len(self.ball_list) - 1:
+				str_out += "\n"
+		return str_out   
     
-        if universe:
-            per_refl
-        elif ball:
-            elastic
-            
+    '''    
+    def isCollision(self, ball_a, ball_b):
+		p1, p2 = ball_a.pos, ball_b.pos
+		v1, v2 = ball_a.vel, ball_b.vel
+		ans = np.dot(p1-p2,v1-v2)
+		if(ans<0):
+			return True
+		else:
+			return False
+     '''
+     
+    def Ucollision(self, ball1):    
+        magp=np.linalg.norm(ball1.pos)
+        upos=np.array(ball1.pos)*(1/magp)
+        
+        norm_v = np.dot(ball1.vel,upos)*np.array(upos)
+        tan_v = np.subtract(ball1.vel,norm_v)
+        ball1.vel = np.subtract(tan_v,norm_v)
+        ball1.bounce+=1
+        
         
     def collision_time():
     #collision time
@@ -73,6 +86,8 @@ class Universe():
     ball1.vel= v1 - (2.*m2/(m1+m2)) * (np.dot(vp,rp)/np.dot(rp,rp))*rp 
     ball2.vel= v2 - (2.*m1/(m1+m2)) * (np.dot(v_p,r_p)/np.dot(r_p,r_p))*r_p 
     
+    ball1.bounce+=1
+    ball2.bounce+=1
     
     
     
