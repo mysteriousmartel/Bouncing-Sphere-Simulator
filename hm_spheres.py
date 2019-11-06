@@ -1,3 +1,11 @@
+import numpy as np
+import sys, os
+from decimal import Decimal
+import copy
+import math
+from timeit import default_timer as timer
+
+
 class Ball():
   def __init__(self, mass, radius, name, pos=[], vel=[]):
     self.mass = mass
@@ -35,7 +43,7 @@ class Universe():
 		return str_out   
     
     '''    
-    def isCollision(self, ball_a, ball_b):
+    def isCollision(self, ball_a, ball_b, t):
 		p1, p2 = ball_a.pos, ball_b.pos
 		v1, v2 = ball_a.vel, ball_b.vel
 		ans = np.dot(p1-p2,v1-v2)
@@ -45,7 +53,7 @@ class Universe():
 			return False
      '''
      
-    def Ucollision(self, ball1):    
+    def Ucollision(self, ball1, t):    
         magp=np.linalg.norm(ball1.pos)
         upos=np.array(ball1.pos)*(1/magp)
         
@@ -53,6 +61,10 @@ class Universe():
         tan_v = np.subtract(ball1.vel,norm_v)
         ball1.vel = np.subtract(tan_v,norm_v)
         ball1.bounce+=1
+        
+        print(ball1, " collided with the universe")
+        print(ball1,"'s new velocity is ", ball1.vel)
+        print("At time ", t)
         
         
     def collision_time():
@@ -68,7 +80,7 @@ class Universe():
 		ball.updatepos(t)
     
         
-    def update_vel(self, ball1, ball2):
+    def update_vel(self, ball1, ball2,t):
     #update ball velocity
     p1, p2= ball1.pos, ball2.pos
     v1, v2= ball1.vel, ball2.vel
@@ -89,7 +101,13 @@ class Universe():
     ball1.bounce+=1
     ball2.bounce+=1
     
+    print(ball1, " collided with ", ball2)
+    print(ball1,"'s new velocity is ", ball1.vel)
+    print(ball2,"'s new velocity is ", ball2.vel)
+    print("At time ", t)
+    
     
     
     def update_time():
     #update time
+        
