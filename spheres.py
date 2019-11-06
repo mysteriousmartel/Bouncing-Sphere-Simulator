@@ -14,6 +14,7 @@ class Ball():
     self.mass = mass
     self.radius = radius
     self.name = name
+    self.bounce = 0
     self.pos = np.array(pos, np.float64)
     self.vel = np.array(vel, np.float64)
     self.time = 0.00000000
@@ -42,8 +43,7 @@ if __name__ == "__main__":
 
   name = []
   initials = []
-  names = []
-
+  
   for line in sys.stdin:
 
     init_val = line.split(" ")
@@ -56,4 +56,29 @@ if __name__ == "__main__":
   #   names = initials[i].name.replace("\n", '')
   #   print(names)
 
-  
+''' Below, I write the code established with Taylor setting up the check for
+collisions with the universe and all other spheres
+
+The following lines go in the iscollisions statement'''
+
+for i in range(len(initials)):
+  if (np.dot(ball_array[i].pos, ball_array[i].pos) >= (radius - ball_array[i].rad)**2):
+    Ucollision(ball_array[i])
+    ball_array[i].bounce = ball_array[i].bounce + 1
+
+    if (ball_array[i].bounce >= univ_coll):
+      print(ball_array[i].names, " has left for the next plane")
+      ball_array.remove(i)
+
+  for j in range(i+1,len(initials)):
+    if (np.dot(np.subtract(ball_array[i].pos,ball_array[j].pos),np.subtract(ball_array[i].pos,ball_array[j].pos)) <= (ball_array[i].rad - ball_array[j].rad)**2):
+      update_vel(ball_array[i],ball_array[j])
+
+      if (ball_array[i].bounce >= univ_coll):
+        print(ball_array[i].names, " has left for the next plane")
+        ball_array.remove(i)
+
+      if (ball_array[j].bounce >= univ_coll):
+        print(ball_array[j].names, " has left for the next plane")
+        ball_array.remove(j)
+
