@@ -61,24 +61,40 @@ collisions with the universe and all other spheres
 
 The following lines go in the iscollisions statement'''
 
-for i in range(len(initials)):
-  if (np.dot(ball_array[i].pos, ball_array[i].pos) >= (radius - ball_array[i].rad)**2):
-    Ucollision(ball_array[i])
-    ball_array[i].bounce = ball_array[i].bounce + 1
-
-    if (ball_array[i].bounce >= univ_coll):
-      print(ball_array[i].names, " has left for the next plane")
-      ball_array.remove(i)
-
-  for j in range(i+1,len(initials)):
-    if (np.dot(np.subtract(ball_array[i].pos,ball_array[j].pos),np.subtract(ball_array[i].pos,ball_array[j].pos)) <= (ball_array[i].rad - ball_array[j].rad)**2):
-      update_vel(ball_array[i],ball_array[j])
+while ball_array != []:
+  for i in range(len(ball_array)):
+    if (np.dot(ball_array[i].pos, ball_array[i].pos) >= (radius - ball_array[i].rad)**2):
+      Ucollision(ball_array[i])
+      ball_array[i].bounce = ball_array[i].bounce + 1
 
       if (ball_array[i].bounce >= univ_coll):
         print(ball_array[i].names, " has left for the next plane")
         ball_array.remove(i)
 
-      if (ball_array[j].bounce >= univ_coll):
-        print(ball_array[j].names, " has left for the next plane")
-        ball_array.remove(j)
+      break
 
+    for j in range(i+1,len(ball_array)):
+      if (np.dot(np.subtract(ball_array[i].pos,ball_array[j].pos),np.subtract(ball_array[i].pos,ball_array[j].pos)) <= (ball_array[i].rad - ball_array[j].rad)**2):
+        update_vel(ball_array[i],ball_array[j])
+
+        if (ball_array[i].bounce >= univ_coll):
+          print(ball_array[i].names, " has left for the next plane")
+          ball_array.remove(i)
+
+        if (ball_array[j].bounce >= univ_coll):
+          print(ball_array[j].names, " has left for the next plane")
+          ball_array.remove(j)
+
+        break
+
+''' Below is the mathematical setup for the real collision checks and
+time quadratic '''
+
+A = (np.linalg.norm(np.subtract(ball_array[i].pos,ball_array[j].pos)))**2
+B = np.dot(np.subtract(ball_array[i].pos,ball_array[j].pos),np.subtract(ball_array[i].vel,ball_array[j].vel))
+C = (np.linalg.norm(np.subtract(ball_array[i].pos,ball_array[j].pos)))**2 - (ball_array[i].rad + ball_array[j].rad)**2
+
+# Broken into plus an minus because I couldn't figure out how tf to make +-
+
+t_plus = ((-1) * B + np.sqrt(B ** 2 - A * C)) / A
+t_minus = ((-1) * B - np.sqrt(B ** 2 - A * C)) / A
