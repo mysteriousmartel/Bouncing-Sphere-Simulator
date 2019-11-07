@@ -22,6 +22,9 @@ class Ball():
   def updatePos(self, t): 
     self.pos += t * self.vel
 
+    for i in range(len(ball_array)):
+      ball_array[i].time = 0.00000000
+
 class Universe():
 
   def __init__(self, radius, max_col, ball_array):
@@ -107,10 +110,6 @@ class Universe():
 
     for i in range(len(ball_array)):
       ball_array[i].time = t
-  
-  def update_pos(self):
-    for ball in self.ball_array:
-      ball.updatepos(ball_array[ball].t)
        
   def Scollision(self, ball1, ball2,t):
     p1, p2= ball1.pos, ball2.pos
@@ -139,6 +138,10 @@ class Universe():
 
     for i in range(len(ball_array)):
       ball_array[i].time = t
+
+  def update_pos(self):
+    for ball in self.ball_array:
+      ball.updatepos(ball_array[ball].time)
   
   def energy(self, ball_array):
     tot_en=0
@@ -163,16 +166,42 @@ if __name__ == "__main__":
 
   print("Please enter the mass, radius, x/y/z position, x/y/z velocity", "\n", "and name of each sphere", "\n", "When complete, use EOF / Ctrl-D to stop entering")
 
-  name = []
   initials = []
   
   for line in sys.stdin:
+    init_val = line.split()
+    mass = init_val[0]
+    radius = init_val[1]
+    x0 = init_val[2]
+    y0 = init_val[3]
+    z0 = init_val[4]
+    vx = init_val[5]
+    vy = init_val[6]
+    vz = init_val[7]
+    name = init_val[8]
 
-    init_val = line.split(" ")
-
-    name.append(init_val[8])
-
-    initials.append(Ball(init_val[0],init_val[1],init_val[8],[init_val[2],init_val[3],init_val[4]],[init_val[5],init_val[6],init_val[7]]))
+    if (len(init_val) != 9):
+      return 1
+    elif (type(mass) != 'float' and mass <= 0):
+      return 1
+    elif (type(radius) != 'float' and radius <= 0):
+      return 1
+    elif (type(x0) != 'float' or type(x0) != 'int'):
+      return 1
+    elif (type(y0) != 'float' or type(y0) != 'int'):
+      return 1
+    elif (type(z0) != 'float' or type(z0) != 'int'):
+      return 1
+    elif (type(vx) != 'float' or type(vx) != 'int'):
+      return 1
+    elif (type(vy) != 'float' or type(vy) != 'int'):
+      return 1
+    elif (type(vz) != 'float' or type(vz) != 'int'):
+      return 1
+    elif (type(name) != 'string' or type(name) != 'char'):
+      return 1
+    else:
+      initials.append(Ball(init_val[0],init_val[1],init_val[8],[init_val[2],init_val[3],init_val[4]],[init_val[5],init_val[6],init_val[7]]))
 
 # Running the simulation
 
@@ -196,8 +225,8 @@ if __name__ == "__main__":
 
     if (colliders[1] == -1):
       Ucollision(ball_array[colliders[0]], minty)
-      print("Kinetic energy")
-      print("Momentum")
+      energy(ball_array)
+      momentum(ball_array)
       ball_array[colliders[0]].bounce += 1
 
       if (ball_array[colliders[0]].bounce == max_col):
@@ -206,8 +235,8 @@ if __name__ == "__main__":
 
     else:
       Scollision(ball_array[colliders[0]], ball_array[colliders[1]], minty)
-      print("Kinetic energy")
-      print("Momentum")
+      energy(ball_array)
+      momentum(ball_array)
       ball_array[colliders[0]].bounce += 1
       ball_array[colliders[1]].bounce += 1
 
