@@ -1,3 +1,11 @@
+import numpy as np
+import sys, os
+from decimal import Decimal
+import copy
+import math
+from timeit import default_timer as timer
+
+
 class Ball():
   def __init__(self, mass, radius, name, pos=[], vel=[]):
     self.mass = mass
@@ -28,8 +36,8 @@ class Universe():
     def __repr__(self):
 		str_out = str(self.time) + "\n"
 		for i in range(len(self.ball_list)):
-			str_out += str(self.ball_list[i].name)+" "+str(self.ball_list[i].pos)[1:-1] 
-									+" "+str(self.ball_list[i].vel)[1:-1]
+			str_out += str(self.ball_list[i].name)+" "+str(self.ball_list[i].pos)[1:-1]+ / 
+									 " "+str(self.ball_list[i].vel)[1:-1]
 			if i != len(self.ball_list) - 1:
 				str_out += "\n"
 		return str_out   
@@ -69,26 +77,39 @@ class Universe():
         
     def collision(self, ball1, ball2,t):
     #update ball velocity
-    p1, p2= ball1.pos, ball2.pos
-    v1, v2= ball1.vel, ball2.vel
-    m1, m2 = ball1.mass, ball2.mass
+        p1, p2= ball1.pos, ball2.pos
+        v1, v2= ball1.vel, ball2.vel
+        m1, m2 = ball1.mass, ball2.mass
+        
+        vp=  np.subtract(v1,v2)
+        v_p= np.subtract(v2-v1)
+        
+        rp=  np.subtract(p1-p2)
+        r_p= np.subtract(p2-p1)
+        
+        mp=  np.subtract(m1-m2)
+        m_p= p.subtract(m2-m1)
+        
+        ball1.vel= v1 - (2.*m2/(m1+m2)) * (np.dot(vp,rp)/np.dot(rp,rp))*rp 
+        ball2.vel= v2 - (2.*m1/(m1+m2)) * (np.dot(v_p,r_p)/np.dot(r_p,r_p))*r_p 
+        
+        ball1.bounce+=1
+        ball2.bounce+=1
+        
+        print(ball1, " collided with ", ball2)
+        print(ball1,"'s new velocity is ", ball1.vel)
+        print(ball2,"'s new velocity is ", ball2.vel)
+        print("At time ", t)
     
-    vp=  np.subtract(v1,v2)
-    v_p= np.subtract(v2-v1)
+    def energy(self, ball_array):
+        tot_en=0
+        for i in range(len(self.ball_array)):
+            tot_en+=.5 * ball_array[i].mass * (np.linalg.norm(ball_array[i].vel))**2\
+        print("energy: {}".format(tot_en))
     
-    rp=  np.subtract(p1-p2)
-    r_p= np.subtract(p2-p1)
+    def momentum(self, ball_array):
+        tot_ro=0
+        for i in range(len(self.ball_array)):
+            tot_ro+=ball_array[i]_mass * np.array(ball_array[i].vel)
+        print("momentum: {}".format(tot_ro))
     
-    mp=  np.subtract(m1-m2)
-    m_p= p.subtract(m2-m1)
-    
-    ball1.vel= v1 - (2.*m2/(m1+m2)) * (np.dot(vp,rp)/np.dot(rp,rp))*rp 
-    ball2.vel= v2 - (2.*m1/(m1+m2)) * (np.dot(v_p,r_p)/np.dot(r_p,r_p))*r_p 
-    
-    ball1.bounce+=1
-    ball2.bounce+=1
-    
-    print(ball1, " collided with ", ball2)
-    print(ball1,"'s new velocity is ", ball1.vel)
-    print(ball2,"'s new velocity is ", ball2.vel)
-    print("At time ", t)
