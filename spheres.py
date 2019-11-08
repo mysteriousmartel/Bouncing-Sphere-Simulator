@@ -116,16 +116,13 @@ class Universe():
     m1, m2 = ball1.mass, ball2.mass
     
     vp=  np.subtract(v1,v2)
-    v_p= np.subtract(v2-v1)
+    v_p= np.subtract(v2,v1)
     
-    rp=  np.subtract(p1-p2)
-    r_p= np.subtract(p2-p1)
+    rp=  np.subtract(p1,p2)
+    r_p= np.subtract(p2,p1)
     
-    mp=  np.subtract(m1-m2)
-    m_p= np.subtract(m2-m1)
-    
-    ball1.vel= v1 - (2.*m2/(m1+m2)) * (np.dot(vp,rp)/np.dot(rp,rp))*rp 
-    ball2.vel= v2 - (2.*m1/(m1+m2)) * (np.dot(v_p,r_p)/np.dot(r_p,r_p))*r_p 
+    ball1.vel= np.subtract(v1,(2*m2/(m1+m2)) * (np.dot(vp,rp)/np.dot(rp,rp))*np.array(rp))
+    ball2.vel= np.subtract(v2,(2*m1/(m1+m2)) * (np.dot(v_p,r_p)/np.dot(r_p,r_p))*np.array(r_p))
     
     ball1.bounce+=1
     ball2.bounce+=1
@@ -239,7 +236,7 @@ if __name__ == "__main__":
       ball_array[colliders[0]].bounce += 1
 
       if (ball_array[colliders[0]].bounce == univ_coll):
-        ball_array.remove(colliders[0])
+        del ball_array[colliders[0]]
         print(ball_array[colliders[0]].name, " has left")
 
     else:
@@ -250,11 +247,11 @@ if __name__ == "__main__":
       ball_array[colliders[1]].bounce += 1
 
       if (ball_array[colliders[0]].bounce == univ_coll):
-        ball_array.remove(colliders[0])
+        del ball_array[colliders[0]]
         print(ball_array[colliders[0]].name, " has left")
 
       if (ball_array[colliders[1]].bounce == univ_coll):
-        ball_array.remove(colliders[1])
+        del ball_array[colliders[1]]
         print(ball_array[colliders[1]].name, " has left")
 
     totalTime += minty
