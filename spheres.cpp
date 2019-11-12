@@ -11,6 +11,9 @@
 
 using namespace std;
 
+// Set all floats to double, so we can do error checking easier
+// Make sure to do error checking
+
 class spheres () 
 {
 		float mass;
@@ -201,7 +204,7 @@ auto universe::momentum(auto ball_array)
 	return 0;
 }
 
-int main (auto rad, int maxCol)
+auto main (auto rad, int maxCol)
 {
 	std::cout << "Please enter the mass, radius, x/y/z position, x/y/z velocity" << "\n";
 	std::cout << "and name of each sphere"<<"\n"<<"When complete, use EOF / Ctrl-D to stop entering";
