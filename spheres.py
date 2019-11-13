@@ -1,9 +1,14 @@
+# Copyright 2019 Jennifer Campbell janeeng@bu.edu
+# Copyright 2019 Haik Martirosyan haikm@bu.edu
+# Copyright 2019 David Henderson dth15@bu.edu
+
 import numpy as np
 import sys, os
 from decimal import Decimal
 import copy
 import math
 from timeit import default_timer as timer
+
 
 class Ball():
 
@@ -17,9 +22,11 @@ class Ball():
     self.time = 0.00000000
 
   def __repr__(self):
-    return str(self.name)+" "+str(self.pos)[1:-1]+" "+str(self.vel)[1:-1]
+    str_out = str(self.time) + "\n"
+    str_out += str(self.name)+" "+ str('m={}'.format(self.mass))+" " +str('R={}'.format(self.radius))+" "+str(' p= {} '.format(self.pos))[1:-1]+" "+str(' v={} '.format(self.vel))[1:-1]+str(" bounces= {} ".format(self.bounce))
+    return str_out
 
-  def updatePos(self, t): 
+  def updatePos(self, ball_array, t): 
     self.pos += t * self.vel
 
     for i in range(len(ball_array)):
@@ -35,9 +42,9 @@ class Universe():
       
   def __repr__(self):
     str_out = str(self.time) + "\n"
-    for i in range(len(self.ball_list)):
-      str_out += str(self.ball_list[i].name)+" "+str(self.ball_list[i].pos)[1:-1]+" "+str(self.ball_list[i].vel)[1:-1]
-      if i != len(self.ball_list) - 1:
+    for i in range(len(self.ball_array)):
+      str_out += str(self.ball_array[i].name)+" "+ str('m={}'.format(self.ball_array.mass))+" " +str('R={}'.format(self.ball_array.radius))+" "+str(self.ball_array[i].pos)[1:-1]+" "+str(self.ball_array[i].vel)[1:-1]
+      if (i != len(self.ball_array) - 1):
         str_out += "\n"
     return str_out  
 
@@ -50,51 +57,60 @@ class Universe():
     B = 2 * np.dot(delp,delv)
     C = np.linalg.norm(delp) ** 2 - Radsum ** 2
 
-    disc = B ** 2 - 4 * A * C
-
-    if (disc < 0 ):
-      return None
-    else:
-      t_plus = ((-1) * B + np.sqrt(disc)) / (2 * A)
-      t_minus = ((-1) * B - np.sqrt(disc)) / (2 * A)
-
-      if (t_plus < 0 and t_minus < 0):
-        return None
-      elif (t_minus < 0):
-        return t_plus
-      else:
-        return t_minus
-
-  def collideU(self,ball,radius):
-    A = np.dot(ball.vel,ball.vel)
-    B = 2 * np.dot(ball.pos,ball.vel)
-    C = np.dot(ball.pos,ball.pos) - radius ** 2
-
-    disc = B ** 2 - 4 * A * C
-
     if (A == 0):
       return None
-    else:
-      t_plus = ((-1) * B + np.sqrt(disc)) / (2 * A)
-      t_minus = ((-1) * B - np.sqrt(disc)) / (2 * A)
 
-      if (t_plus < 0 and t_minus < 0):
+    else:
+      disc = B ** 2 - 4 * A * C
+
+      if (disc < 0 ):
         return None
-      elif (t_minus < 0):
-        return t_plus
       else:
-        return t_minus
+        t_plus = ((-1) * B + np.sqrt(disc)) / (2 * A)
+        t_minus = ((-1) * B - np.sqrt(disc)) / (2 * A)
+
+        if (t_plus < 0 and t_minus < 0):
+          return None
+        elif (t_minus < 0):
+          return t_plus
+        else:
+          return t_minus
+
+  def collideU(self,ball,radius):
+    if(all(ball.pos==([0,0,0]))):
+      return None
+    else:
+      A = np.dot(ball.vel,ball.vel)
+      B = 2 * np.dot(ball.pos,ball.vel)
+      C = np.dot(ball.pos,ball.pos) - radius ** 2
+
+      disc = B ** 2 - 4 * A * C
+
+      if (A == 0):
+        return None
+      else:
+        t_plus = ((-1) * B + np.sqrt(disc)) / (2 * A)
+        t_minus = ((-1) * B - np.sqrt(disc)) / (2 * A)
+
+        if (t_plus < 0 and t_minus < 0):
+          return None
+        elif (t_minus < 0):
+          return t_plus
+        else:
+          return t_minus
 
   def realColl(self,ball1,ball2,t):
     delv = np.subtract(ball1.vel,ball2.vel)
-    r1 = np.sum(ball1.pos,t*np.array(ball1.vel))
-    r2 = np.sum(ball2.pos,t*np.array(ball2.vel))
+    vel1_at_t=t*np.array(ball1.vel)
+    vel2_at_t=t*np.array(ball2.vel)
+    r1 = np.add(ball1.pos,vel1_at_t)
+    r2 = np.add(ball2.pos,vel2_at_t)
     delr = np.subtract(r1,r2)
 
     realCheck = np.dot(delr,delv)
     return realCheck
    
-  def Ucollision(self, ball1, t):    
+  def Ucollision(self, ball1, ball_array, t, tot_t):    
     magp=np.linalg.norm(ball1.pos)
     upos=np.array(ball1.pos)*(1/magp)
     
@@ -103,14 +119,14 @@ class Universe():
     ball1.vel = np.subtract(tan_v,norm_v)
     ball1.bounce+=1
     
-    print(ball1, " collided with the universe")
-    print(ball1,"'s new velocity is ", ball1.vel)
-    print("At time ", t)
+    print(ball1.name, " collided with the universe")
+    print(ball1)
+    print("At time {}".format(tot_t))
 
     for i in range(len(ball_array)):
       ball_array[i].time = t
        
-  def Scollision(self, ball1, ball2,t):
+  def Scollision(self, ball1, ball2, ball_array, t, tot_t):
     p1, p2= ball1.pos, ball2.pos
     v1, v2= ball1.vel, ball2.vel
     m1, m2 = ball1.mass, ball2.mass
@@ -128,16 +144,16 @@ class Universe():
     ball2.bounce+=1
     
     print(ball1, " collided with ", ball2)
-    print(ball1,"'s new velocity is ", ball1.vel)
-    print(ball2,"'s new velocity is ", ball2.vel)
-    print("At time ", t)
+    print(ball1)
+    print(ball2)
+    print("At time {}".format(tot_t))
 
     for i in range(len(ball_array)):
       ball_array[i].time = t
 
-  def update_pos(self):
-    for ball in self.ball_array:
-      ball.updatepos(ball_array[ball].time)
+  def update_pos(self, ball_array):
+    for i in range(len(ball_array)):
+      ball_array[i].updatePos(ball_array, ball_array[i].time)
   
   def energy(self, ball_array):
     tot_en=0
@@ -154,35 +170,35 @@ class Universe():
 if __name__ == "__main__":
 
   univ_rad = float(sys.argv[1])
-  univ_coll = int(sys.argv[2])
+  univ_coll = int(sys.argv[2]) * 2
 
   totalTime = 0.0
 
   initials = []
 
-  def inputCheck(init_val,mass,radius,x0,y0,z0,vx,vy,vz,name):
-    if (len(init_val) != 9):
-      return 1
-    elif (type(mass) != float and mass <= 0):
-      return 1
-    elif (type(radius) != float and radius <= 0):
-      return 1
-    elif (type(x0) != float or type(x0) != int):
-      return 1
-    elif (type(y0) != float or type(y0) != int):
-      return 1
-    elif (type(z0) != float or type(z0) != int):
-      return 1
-    elif (type(vx) != float or type(vx) != int):
-      return 1
-    elif (type(vy) != float or type(vy) != int):
-      return 1
-    elif (type(vz) != float or type(vz) != int):
-      return 1
-    elif (type(name) != str):
-      return 1
-    else:
-      pass
+  # def inputCheck(init_val,mass,radius,x0,y0,z0,vx,vy,vz,name):
+  #   if (len(init_val) != 9):
+  #     return 1
+  #   elif (type(mass) != float and mass <= 0):
+  #     return 1
+  #   elif (type(radius) != float and radius <= 0):
+  #     return 1
+  #   elif (type(x0) != float or type(x0) != int):
+  #     return 1
+  #   elif (type(y0) != float or type(y0) != int):
+  #     return 1
+  #   elif (type(z0) != float or type(z0) != int):
+  #     return 1
+  #   elif (type(vx) != float or type(vx) != int):
+  #     return 1
+  #   elif (type(vy) != float or type(vy) != int):
+  #     return 1
+  #   elif (type(vz) != float or type(vz) != int):
+  #     return 1
+  #   elif (type(name) != str):
+  #     return 1
+  #   else:
+  #     pass
 
   print("Please enter the mass, radius, x/y/z position, x/y/z velocity", "\n", "and name of each sphere", "\n", "When complete, use EOF / Ctrl-D to stop entering")
 
@@ -200,8 +216,6 @@ if __name__ == "__main__":
     vz = float(init_val[7])
     name = init_val[8]
 
-    print(type(mass)," ",type(radius)," ",type(x0)," ",type(y0))
-
     # inputCheck(init_val,mass,radius,x0,y0,z0,vx,vy,vz,name)
 
     initials.append(Ball(mass,radius,name,[x0,y0,z0],[vx,vy,vz]))
@@ -209,51 +223,63 @@ if __name__ == "__main__":
   universe = Universe(univ_rad,univ_coll,initials)
   ball_array = universe.ball_array
 
+
+
 # Running the simulation
-
+  
+  minty = float("inf")
+  print(type(minty))
+  colliders = (0,0)
+      
   while (ball_array != []):
-    minty = float("inf")
-    colliders = (0,0)
-
-    for i in range(len(ball_array)-1):
-      t = universe.collideU(ball_array[i],univ_rad)
-      if (t != None and t < minty):
-        minty = t
-        colliders = (i,-1)
-      else:
+    if(len(ball_array)==1):
+      minty=universe.collideU(ball_array[0],univ_rad)
+      colliders= (0, -1)
+    else:
+      for i in range(len(ball_array)-1):
+        t = universe.collideU(ball_array[i],univ_rad)
+        if (t != None and t < minty):
+          if (colliders != (i,-1)):
+            minty = t
+            colliders = (i,-1)
         for j in range(i+1,len(ball_array)):
           t = universe.collideS(ball_array[i],ball_array[j])
           if (t != None and t < minty):
-            collCheck = realColl(ball_array[i],ball_array[j],t)
-            if (collCheck < 0):
-              minty = t
-              colliders = (i,j)
-
+            if (colliders != (i,j)):
+              collCheck = universe.realColl(ball_array[i],ball_array[j],t)
+              if (collCheck < 0):
+                minty = t
+                colliders = (i,j)
+    totalTime += minty
     if (colliders[1] == -1):
-      universe.Ucollision(ball_array[colliders[0]], minty)
+      universe.Ucollision(ball_array[colliders[0]], ball_array, minty, totalTime)
       universe.energy(ball_array)
       universe.momentum(ball_array)
       ball_array[colliders[0]].bounce += 1
-
+      
       if (ball_array[colliders[0]].bounce == univ_coll):
-        del ball_array[colliders[0]]
         print(ball_array[colliders[0]].name, " has left")
-
+        del ball_array[colliders[0]]
     else:
-      universe.Scollision(ball_array[colliders[0]], ball_array[colliders[1]], minty)
+      universe.Scollision(ball_array[colliders[0]], ball_array[colliders[1]], ball_array, minty, totalTime)
       universe.energy(ball_array)
       universe.momentum(ball_array)
       ball_array[colliders[0]].bounce += 1
       ball_array[colliders[1]].bounce += 1
 
-      if (ball_array[colliders[0]].bounce == univ_coll):
-        del ball_array[colliders[0]]
+      if (ball_array[colliders[0]].bounce >= univ_coll and colliders[1]>= univ_coll):
         print(ball_array[colliders[0]].name, " has left")
-
-      if (ball_array[colliders[1]].bounce == univ_coll):
-        del ball_array[colliders[1]]
         print(ball_array[colliders[1]].name, " has left")
+        del ball_array[colliders[1]]
+        del ball_array[colliders[0]]
 
-    totalTime += minty
-
+      elif (ball_array[colliders[1]].bounce >= univ_coll):
+        print(ball_array[colliders[1]].name, " has left")
+        del ball_array[colliders[1]]
+      elif (ball_array[colliders[0]].bounce >= univ_coll):
+        print(ball_array[colliders[0]].name, " has left")
+        del ball_array[colliders[0]]
+    
+    universe.update_pos(ball_array)
+  
   print("Total time for all spheres to vanish: ", totalTime)
