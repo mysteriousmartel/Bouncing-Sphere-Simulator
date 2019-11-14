@@ -227,6 +227,8 @@ void universe::Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto 
 	
 	rp = vMinus(p1,p2);
 	r_p = vMinus(p2,p1);
+
+
 	
 	
 	return 0;
@@ -234,6 +236,10 @@ void universe::Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto 
 
 void universe::update_pos(auto ball_array)
 {
+	for(i=0; i < size(ball_array); i++)
+	{
+		ball_array[i].updatePos(ball_array, ball_array[i].time);
+	}
 	return 0;
 }
 
