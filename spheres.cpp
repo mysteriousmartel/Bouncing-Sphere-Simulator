@@ -33,7 +33,7 @@ struct spheres ()
 		void setMass(float mass1);
 		void setPos(float pos1[3]);
 		void setVel(float vel1[3]);
-		void setName(std::string name1);
+		void setName(string name1);
 };
 void spheres::setMass(float mass1)
 {
@@ -47,7 +47,7 @@ void spheres::setVel(float vel1[3])
 {
 	vel=vel1;
 }
-void spheres::setName(std::string name1)
+void spheres::setName(string name1)
 {
 	name=name1;
 }
@@ -63,7 +63,7 @@ float spheres::getVel()
 {
 	return (vel);
 }
-std::string spheres::getName()
+string spheres::getName()
 {
 	return (name);
 }
@@ -141,10 +141,10 @@ void universe::collideU(auto ball, auto radius)
 	}
 	else
 	{
-		auto A = std::inner_product(std::begin(ball.vel), std::end(ball.vel), std::begin(ball.vel), 0.0);
-		auto B = 2 * std::inner_product(std::begin(ball.pos), std::end(ball.pos), std::begin(ball.vel), 0.0);
+		auto A = inner_product(begin(ball.vel), end(ball.vel), begin(ball.vel), 0.0);
+		auto B = 2 * inner_product(begin(ball.pos), end(ball.pos), begin(ball.vel), 0.0);
 
-		auto c1 = std::inner_product(std::begin(ball.pos), std::end(ball.pos), std::begin(ball.pos), 0.0);
+		auto c1 = inner_product(begin(ball.pos), end(ball.pos), begin(ball.pos), 0.0);
 		auto c2 = pow(ball.rad,2);
 		auto C = c1 - c2;
 
@@ -177,21 +177,21 @@ void universe::collideU(auto ball, auto radius)
 
 void universe::realColl(auto ball1, auto ball2, float t)
 {
-	std::vector<double> delv = ball1.vel - ball2.vel;
-	std::vector<double> vel1_t = t * ball1.vel;
-	std::vector<double> vel2_t = t * ball2.vel;
-	std::vector<double> r1 = ball1.pos + vel1_t;
-	std::vector<double> r2 = ball2.pos + vel2_t;
-	std::vector<double> delr = r1 - r2;
+	vector<double> delv = ball1.vel - ball2.vel;
+	vector<double> vel1_t = t * ball1.vel;
+	vector<double> vel2_t = t * ball2.vel;
+	vector<double> r1 = ball1.pos + vel1_t;
+	vector<double> r2 = ball2.pos + vel2_t;
+	vector<double> delr = r1 - r2;
 
-	auto realCheck = std::inner_product(std::begin(delr), std::end(delr), std::begin(delv), 0.0);
+	auto realCheck = inner_product(begin(delr), end(delr), begin(delv), 0.0);
 
 	return realCheck;
 }
 
 void universe::Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
 {
-	auto magp=std::norm(ball1.pos);
+	auto magp=norm(ball1.pos);
 	upos[3]= {};
 
 	for(i=0; i<size(ball1.pos); i++)
@@ -199,14 +199,14 @@ void universe::Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
 	    upos[i]=upos[i]/magp;
 	}
 
-	norm_v=std::inner_product(begin(ball1.vel), end(ball1.vel), begin(upos), 0.0);
+	norm_v=inner_product(begin(ball1.vel), end(ball1.vel), begin(upos), 0.0);
 	tan_v=minus(ball1.vel,norm_v);
 	ball1.vel = minus(tan_v,norm_v);
 	ball1.bounce++;
 	
-	std::cout<<ball1.name<<" collided with the universe\n";
+	cout<<ball1.name<<" collided with the universe\n";
 	Ball::Print(ball1);
-	std::cout<<"At time "<<tot_t;
+	cout<<"At time "<<tot_t;
 	
 	for(i=0;i<size(ball_array);i++)
 	{
