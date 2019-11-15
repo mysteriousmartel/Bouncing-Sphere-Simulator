@@ -51,91 +51,58 @@ struct Vec
 		return vout;
 	}
 
-	Vec norm(Vec vec)
+	Vec Norm(Vec vec)
 	{
 		auto vout = sqrt(vec * vec);
 		return vout;
 	}
 }
 
-struct spheres () 
+struct ball() 
 {
-		float mass;
-		float pos [3] ={};
-		float vel [3] = {};
+		auto mass, rad;
+		Vec pos, vel;
 		string name;
-		void setMass(float mass1);
-		void setPos(float pos1[3]);
-		void setVel(float vel1[3]);
-		void setName(string name1);
 
-		void setMass(float mass1)
+		Ball(){}
+
+		Ball(auto mass, auto rad, Vec pos, Vec vec, string name)
 		{
-			mass=mass1;
+			// may need time, bounce count...
+
+			this->mass = mass;
+			this->rad = rad;
+			this->pos = pos;
+			this->vel = vel;
+			this->name = name;
 		}
 
-		void setPos(float pos1)
-		{
-			pos = pos1;
-		}
+		BallArray(){}
 
-		void setVel(float vel1[3])
+		BallArray()
 		{
-			vel=vel1;
-		}
-
-		void setName(string name1)
-		{
-			name=name1;
-		}
-
-		float getMass()
-		{
-			return (mass);
-		}
-
-		float getPos()
-		{
-			return (pos);
-		}
-
-		float getVel()
-		{
-			return (vel);
-		}
-
-		string getName()
-		{
-			return (name);
+			// wtf do we put in here, 
+			// i just think we should have this to represent the array
 		}
 };
 
 struct universe()
 {
-	float radius;
-	float max_col;
-	vector ball_array;
-	double time;
+	auto radius;
+	auto max_col;
+	BallArray ball_array;
+	auto time;
 
-	auto collideS(auto ball1,auto ball2)
+	auto collideS(Ball ball1, Ball ball2)
 	{
 		// have to figure out how to designate the specific
 		// parts of the array
 		Vec delv = ball1.vel - ball2.vel
 		Vec delp = ball1.pos - ball2.pos
-		float Radsum = ball1.rad - ball2.rad
-
-		// not fully sure how this works yet, check
-		// cppreference for more info
-
-		auto A = pow(norm(delv),2);
-
-		// still shaky about this vector thing too, jsyk
-		// see cppreference for info on std::inner_product
-
-		auto B = 2 * inner_product(begin(delp), end(delp), begin(delv), 0.0);
-
-		auto c1 = norm(delp);
+		auto Radsum = ball1.rad - ball2.rad
+		auto A = pow(Norm(delv),2);
+		auto B = 2 * (delp * delv);
+		auto c1 = Norm(delp);
 		auto c2 = pow(Radsum,2);
 		auto C = c1 - c2;
 
@@ -172,24 +139,24 @@ struct universe()
 		}
 	}
 
-	auto collideU(auto ball, auto radius)
+	auto collideU(Ball ball, auto radius)
 	{
 		// need to finish this line to match ball.pos and
 		// other vectors
 
-		if (ball == {0,0,0})
+		// unsure if this works
+
+		if (all_of(ball.pos == {0,0,0}))
 		{
 			return 0;
 		}
 		else
 		{
-			auto A = inner_product(begin(ball.vel), end(ball.vel), begin(ball.vel), 0.0);
-			auto B = 2 * inner_product(begin(ball.pos), end(ball.pos), begin(ball.vel), 0.0);
-
-			auto c1 = inner_product(begin(ball.pos), end(ball.pos), begin(ball.pos), 0.0);
+			auto A = ball.vel * ball.vel;
+			auto B = 2 * ball.pos * ball.vel;
+			auto c1 = ball.pos * ball.pos;
 			auto c2 = pow(ball.rad,2);
 			auto C = c1 - c2;
-
 			auto disc = pow(B,2) - (4 * A * C);
 
 			if (A == 0)
@@ -217,33 +184,33 @@ struct universe()
 		}
 	}
 
-	void realColl(auto ball1, auto ball2, float t)
+	void realColl(Ball ball1, Ball ball2, auto t)
 	{
-		vector<double> delv = ball1.vel - ball2.vel;
-		vector<double> vel1_t = t * ball1.vel;
-		vector<double> vel2_t = t * ball2.vel;
-		vector<double> r1 = ball1.pos + vel1_t;
-		vector<double> r2 = ball2.pos + vel2_t;
-		vector<double> delr = r1 - r2;
+		Vec delv = ball1.vel + scalarMult(-1,ball2.vel);
+		Vec vel1_t = scalarMult(t,ball1.vel);
+		Vec vel2_t = scalarMult(t,ball2.vel);
+		Vec r1 = ball1.pos + vel1_t;
+		Vec r2 = ball2.pos + vel2_t;
+		Vec delr = r1 + scalarMult(-1,r2);
 
-		auto realCheck = inner_product(begin(delr), end(delr), begin(delv), 0.0);
+		auto realCheck = delr * delv;
 
 		return realCheck;
 	}
 
-	void Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
+	void Ucollision(Ball ball1, BallArray ball_array, auto t, auto tot_t)
 	{
-		auto magp=norm(ball1.pos);
-		upos[3]= {};
+		auto magp=Norm(ball1.pos);
+		Vec upos[3]= {};
 
 		for(i=0; i<size(ball1.pos); i++)
 		{
 		    upos[i]=upos[i]/magp;
 		}
 
-		norm_v=inner_product(begin(ball1.vel), end(ball1.vel), begin(upos), 0.0);
-		tan_v=minus(ball1.vel,norm_v);
-		ball1.vel = minus(tan_v,norm_v);
+		norm_v= ball1.vel * upos;
+		tan_v=ball1.vel + scalarMult(-1,norm_v);
+		ball1.vel = tan_v + scalarMult(-1,norm_v);
 		ball1.bounce++;
 		
 		cout<<ball1.name<<" collided with the universe\n";
@@ -257,44 +224,36 @@ struct universe()
 		return 0;
 	}
 
-	void Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto tot_t)
+	void Scollision(Ball ball1, Ball ball2, BallArray ball_array, auto t, auto tot_t)
 	{
-		    vec p1 = ball_1.pos;
-		    vec p2 = ball_2.pos;
-		    vec v1 = ball_1.vel;
-		    vec v2 = ball_2.vel;
-		    double m1 = ball_1.mass;
-		    double m2 = ball_2.mass;
-
-		    del_v12 = v1-v2;
-		    del_v21 = scalarMul(-1, del_p21);
-		    del_p12 = p1-p2;
-		    del_p21 = scalarMul(-1, del_p21);
-
-		    ball1_ratio = 2 * m2/(m1+m2) * (del_v12*del_p12)/(norm(del_p12));
-		    ball2_ratio = 2 * m1/(m1+m2) * (del_v21*del_p21)/(norm(del_p21));
-
-		    ball1.vec = ball1.vel - scalarMul(ball1_rat,del_p12);
-		    ball2.vec = ball2.vel - scalarMul(ball2_rat,del_p21);
-
-		    ball1.bounce ++;
-		    ball2.bounce ++;
+		p1 = ball1.pos;
+		p2 = ball2.pos;
+		v1 = ball1.vel;
+		v2 = ball2.vel;
+		m1 = ball1.mass;
+		m2 = ball2.mass;
+		
+		vp = v1 + scalarMult(-1,v2);
+		v_p = v2 + scalarMult(-1,v1);
+		
+		rp = p1 + scalarMult(-1,p2);
+		r_p = p2 + scalarMult(-1,p1);
 		
 		
 		return 0;
 	}
 
-	Vec update_pos(auto ball_array)
+	Vec update_pos(BallArray ball_array)
 	{
 		return 0;
 	}
 
-	auto energy(auto ball_array)
+	auto energy(BallArray ball_array)
 	{
 		return 0;
 	}
 
-	Vec momentum(auto ball_array)
+	Vec momentum(BallArray ball_array)
 	{
 		return 0;
 	}
