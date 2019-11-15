@@ -8,6 +8,7 @@
 #include <complex>
 #include <numeric>
 #include <math.h>
+#include <list>
 
 using namespace std;
 
@@ -90,7 +91,7 @@ struct universe()
 {
 	auto radius;
 	auto max_col;
-	BallArray ball_array;
+	list <Ball> ball_array;
 	auto time;
 
 	auto collideS(Ball ball1, Ball ball2)
@@ -245,10 +246,6 @@ struct universe()
 
 	Vec update_pos(BallArray ball_array)
 	{
-		for(i=0; i < size(ball_array); i++)
-		{
-			ball_array[i].updatePos(ball_array, ball_array[i].time);
-		}	
 		return 0;
 	}
 
