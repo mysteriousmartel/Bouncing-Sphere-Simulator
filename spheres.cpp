@@ -12,7 +12,6 @@
 
 using namespace std;
 
-// Set all floats to double, so we can do error checking easier
 // Make sure to do error checking
 
 struct Vec
@@ -64,18 +63,24 @@ struct ball()
 		auto mass, rad;
 		Vec pos, vel;
 		string name;
+		auto time, bounce;
 
 		Ball(){}
 
 		Ball(auto mass, auto rad, Vec pos, Vec vec, string name)
 		{
-			// may need time, bounce count...
-
 			this->mass = mass;
 			this->rad = rad;
 			this->pos = pos;
 			this->vel = vel;
 			this->name = name;
+			time = 0.0;
+			bounce = 0;
+		}
+
+		auto updatePos(Ball ball, auto t)
+		{
+			ball.pos = ball.pos + scalarMult(t,ball.vel);
 		}
 };
 
@@ -88,8 +93,6 @@ struct universe()
 
 	auto collideS(Ball ball1, Ball ball2)
 	{
-		// have to figure out how to designate the specific
-		// parts of the array
 		Vec delv = ball1.vel - ball2.vel
 		Vec delp = ball1.pos - ball2.pos
 		auto Radsum = ball1.rad - ball2.rad
@@ -101,7 +104,7 @@ struct universe()
 
 		if (A == 0)
 		{
-			return 0;
+			return False;
 		}
 		else
 		{
@@ -109,7 +112,7 @@ struct universe()
 
 			if (disc < 0)
 			{
-				return 0;
+				return False;
 			}
 			else
 			{
@@ -118,7 +121,7 @@ struct universe()
 
 				if (t_plus < 0 and t_minus < 0)
 				{
-					return 0;
+					return False;
 				}
 				else if (t_minus < 0)
 				{
@@ -134,14 +137,11 @@ struct universe()
 
 	auto collideU(Ball ball, auto radius)
 	{
-		// need to finish this line to match ball.pos and
-		// other vectors
-
 		// unsure if this works
 
 		if (all_of(ball.pos == {0,0,0}))
 		{
-			return 0;
+			return False;
 		}
 		else
 		{
@@ -154,7 +154,7 @@ struct universe()
 
 			if (A == 0)
 			{
-				return 0;
+				return False;
 			}
 			else
 			{
@@ -163,7 +163,7 @@ struct universe()
 
 				if (t_plus < 0 and t_minus < 0)
 				{
-					return 0;
+					return False;
 				}
 				else if (t_minus < 0)
 				{
@@ -236,9 +236,13 @@ struct universe()
 		return 0;
 	}
 
-	Vec update_pos(vector<Ball> ball_array)
+	void update_pos(vector<Ball> ball_array)
 	{
-		return 0;
+		for (i = 0; i < ball_array.size(); i++)
+		{
+			ball_array[i].updatePos();
+			ball_array[i].time = 0.0;
+		}
 	}
 
 	auto energy(vector<Ball> ball_array)
@@ -252,13 +256,12 @@ struct universe()
 	}
 };
 
-auto main (auto rad, int maxCol)
+int main (auto rad, int maxCol)
 {
 	auto univ_rad = rad;
 	int univ_coll = maxCol;
 
 	vector<double> initials;
-	vector<double> pos, vel;
 	auto total_time = 0.0;
 
 	auto mass, radius, x0, y0, z0, vx, vy, vz;
@@ -269,18 +272,98 @@ auto main (auto rad, int maxCol)
 	while(!cin.eof())
 	{
 		cin>>mass>>radius>>x0>>y0>>x0>>vx>>vy>>vz>>name;
-		pos = {x0,y0,z0};
-		vel = {vx,vy,vz};
+		Vec pos(x0,y0,z0);
+		Vec vel(vx,vy,vz);
 
-		// we gotta make a function that shoves all of these values into the
-		// ball class
 		initials.push_back(Ball(mass,radius,name,pos,vel));
 	}
 
-	// unsure about these two lines, but i think we should similarly make
-	// a universe function to call all this stuff
 	void universe = Universe(univ_rad,univ_coll,initials);
-	vector<double> ball_array = universe.ball_array
+	vector<Ball> ball_array = universe.ball_array;
 
-	// will work on simulator tomorrow with group
+	auto minty = universe.collideU(ball_array[0],univ_rad);
+	array<int> colliders(0,0);
+
+	while (!ball_array.empty())
+	{
+		if (ball_array.size()==1)
+		{
+			minty = universe.collideU(ball_array[0],univ_rad);
+			colliders = {0,-1};
+		}
+		else
+		{
+			for (i=0; i<ball_array.size()-1;i++)
+			{
+				t = universe.collideU(ball_array[i],univ_rad);
+				if (t != False and t<minty)
+				{
+					if (colliders != (i,-1))
+					{
+						minty = t;
+						colliders = (i,-1);
+					}
+				}
+				for (j=i+1;j<ball_array.size();j++)
+				{
+					t = universe.collideS(ball_array[i],ball_array[j]);
+					if (t != False and t < minty)
+					{
+						if (colliders != (i,j))
+						{
+							collCheck = universe.realColl(ball_array[i],ball_array[j],t);
+							if (collCheck < 0)
+							{
+								minty = t;
+								colliders = (i,j);
+							}
+						}
+					}
+				}
+			}
+		}
+		total_time = total_time + minty;
+
+		if (colliders[1] == -1)
+		{
+			universe.Ucollision(ball_array[colliders[0]],ball_array,minty,total_time);
+			universe.energy(ball_array);
+			universe.momentum(ball_array);
+			ball_array[colliders[0]].bounce = ball_array[colliders[0]].bounce + 1;
+
+			if (ball_array[colliders[0]].bounce == univ_coll)
+			{
+				cout<<ball_array[colliders[0]].name<<" has left"<<endl;
+				ball_array.erase(colliders[0]);
+			}
+		}
+		else
+		{
+			universe.Scollision(ball_array[colliders[0]], ball_array[colliders[1]], ball_array, minty, totalTime);
+      universe.energy(ball_array);
+      universe.momentum(ball_array);
+      ball_array[colliders[0]].bounce = ball_array[colliders[0]].bounce + 1
+      ball_array[colliders[1]].bounce = ball_array[colliders[1]].bounce + 1
+
+      if (ball_array[colliders[0]].bounce > = univ_coll and colliders[1] >= univ_coll)
+      {
+      	cout<<ball_array[colliders[0]].name<<" has left"<<endl;
+      	cout<<ball_array[colliders[1]].name<<" has left"<<endl;
+      	ball_array.erase(colliders[1]);
+      	ball_array.erase(colliders[0]);
+      }
+      else if (ball_array[colliders[1]].bounce >= univ_coll)
+      {
+      	cout<<ball_array[colliders[1]].name<<" has left"<<endl;
+      	ball_array.erase(colliders[1]);
+      }
+      else if (ball_array[colliders[0]].bounce >= univ_coll)
+      {
+      	cout<<ball_array[colliders[0]].name<<" has left"<<endl;
+      	ball_array.erase(colliders[0]);
+      }
+		}
+		universe.updatePos(ball_array);
+	}
+	cout<<"Total time for all spheres to vanish: "<<total_time<<endl;
 }
