@@ -14,14 +14,48 @@ using namespace std;
 // Set all floats to double, so we can do error checking easier
 // Make sure to do error checking
 
-vector<double> vMinus(array1, array2)
+struct Vec
 {
-    finalArray[3]={};
-    for(i=0;i<size(array1);i++)
-    {
-        finalArray[i] = array1[i]-array2[i]; 
-    }
-    return finalArray;
+	vector<double> vec;
+
+	Vec(){}
+
+	Vec(auto x1, auto x2, auto x3)
+	{
+		vec.push_back(x1);
+		vec.push_back(x2);
+		vec.push_back(x3);
+	}
+
+	Vec operator+(vec1, vec2);
+	{
+		auto x1 = vec1[0] + vec2[0];
+		auto x2 = vec1[1] + vec2[1];
+		auto x3 = vec1[2] + vec2[2];
+		Vec vout(x1,x2,x3);
+		return vout;
+	}
+
+	Vec operator*(Vec vec1, Vec vec2)
+	{
+		auto vout = vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[1];
+		return vout;
+	}
+
+	Vec scalarMult(auto c, Vec vec)
+	{
+		auto x1 = c * vec[0];
+		auto x2 = c * vec[1];
+		auto x3 = c * vec[2];
+		Vec vout(x1, x2, x3);
+		return vout;
+	}
+
+	Vec norm(Vec vec)
+	{
+		auto vout = sqrt(vec * vec);
+		return vout;
+	}
 }
 
 struct spheres () 
@@ -34,39 +68,47 @@ struct spheres ()
 		void setPos(float pos1[3]);
 		void setVel(float vel1[3]);
 		void setName(string name1);
+
+		void setMass(float mass1)
+		{
+			mass=mass1;
+		}
+
+		void setPos(float pos1)
+		{
+			pos = pos1;
+		}
+
+		void setVel(float vel1[3])
+		{
+			vel=vel1;
+		}
+
+		void setName(string name1)
+		{
+			name=name1;
+		}
+
+		float getMass()
+		{
+			return (mass);
+		}
+
+		float getPos()
+		{
+			return (pos);
+		}
+
+		float getVel()
+		{
+			return (vel);
+		}
+
+		string getName()
+		{
+			return (name);
+		}
 };
-void spheres::setMass(float mass1)
-{
-	mass=mass1;
-}
-void spheres::setPos(float pos1)
-{
-	pos = pos1;
-}
-void spheres::setVel(float vel1[3])
-{
-	vel=vel1;
-}
-void spheres::setName(string name1)
-{
-	name=name1;
-}
-float spheres::getMass()
-{
-	return (mass);
-}
-float spheres::getPos()
-{
-	return (pos);
-}
-float spheres::getVel()
-{
-	return (vel);
-}
-string spheres::getName()
-{
-	return (name);
-}
 
 struct universe()
 {
@@ -74,81 +116,28 @@ struct universe()
 	float max_col;
 	vector ball_array;
 	double time;
-}
-void universe::collideS(auto ball1,auto ball2)
-{
-	// have to figure out how to designate the specific
-	// parts of the array
-	vector delv = ball1.vel - ball2.vel
-	vector delp = ball1.pos - ball2.pos
-	float Radsum = ball1.rad - ball2.rad
 
-	// not fully sure how this works yet, check
-	// cppreference for more info
-
-	auto A = pow(norm(delv),2);
-
-	// still shaky about this vector thing too, jsyk
-	// see cppreference for info on std::inner_product
-
-	auto B = 2 * inner_product(begin(delp), end(delp), begin(delv), 0.0);
-
-	auto c1 = norm(delp);
-	auto c2 = pow(Radsum,2);
-	auto C = c1 - c2;
-
-	if (A == 0)
+	auto collideS(auto ball1,auto ball2)
 	{
-		return 0;
-	}
-	else
-	{
-		auto disc = pow(B,2) - (4 * A * C);
+		// have to figure out how to designate the specific
+		// parts of the array
+		Vec delv = ball1.vel - ball2.vel
+		Vec delp = ball1.pos - ball2.pos
+		float Radsum = ball1.rad - ball2.rad
 
-		if (disc < 0)
-		{
-			return 0;
-		}
-		else
-		{
-			auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
-			auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
+		// not fully sure how this works yet, check
+		// cppreference for more info
 
-			if (t_plus < 0 and t_minus < 0)
-			{
-				return 0;
-			}
-			else if (t_minus < 0)
-			{
-				return t_plus;
-			}
-			else
-			{
-				return t_minus;
-			}
-		}
-	}
-}
+		auto A = pow(norm(delv),2);
 
-void universe::collideU(auto ball, auto radius)
-{
-	// need to finish this line to match ball.pos and
-	// other vectors
+		// still shaky about this vector thing too, jsyk
+		// see cppreference for info on std::inner_product
 
-	if (ball == {0,0,0})
-	{
-		return 0;
-	}
-	else
-	{
-		auto A = inner_product(begin(ball.vel), end(ball.vel), begin(ball.vel), 0.0);
-		auto B = 2 * inner_product(begin(ball.pos), end(ball.pos), begin(ball.vel), 0.0);
+		auto B = 2 * inner_product(begin(delp), end(delp), begin(delv), 0.0);
 
-		auto c1 = inner_product(begin(ball.pos), end(ball.pos), begin(ball.pos), 0.0);
-		auto c2 = pow(ball.rad,2);
+		auto c1 = norm(delp);
+		auto c2 = pow(Radsum,2);
 		auto C = c1 - c2;
-
-		auto disc = pow(B,2) - (4 * A * C);
 
 		if (A == 0)
 		{
@@ -156,102 +145,152 @@ void universe::collideU(auto ball, auto radius)
 		}
 		else
 		{
-			auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
-			auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
+			auto disc = pow(B,2) - (4 * A * C);
 
-			if (t_plus < 0 and t_minus < 0)
+			if (disc < 0)
 			{
 				return 0;
 			}
-			else if (t_minus < 0)
-			{
-				return t_plus;
-			}
 			else
 			{
-				return t_minus;
+				auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
+				auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
+
+				if (t_plus < 0 and t_minus < 0)
+				{
+					return 0;
+				}
+				else if (t_minus < 0)
+				{
+					return t_plus;
+				}
+				else
+				{
+					return t_minus;
+				}
 			}
 		}
 	}
-}
 
-void universe::realColl(auto ball1, auto ball2, float t)
-{
-	vector<double> delv = ball1.vel - ball2.vel;
-	vector<double> vel1_t = t * ball1.vel;
-	vector<double> vel2_t = t * ball2.vel;
-	vector<double> r1 = ball1.pos + vel1_t;
-	vector<double> r2 = ball2.pos + vel2_t;
-	vector<double> delr = r1 - r2;
-
-	auto realCheck = inner_product(begin(delr), end(delr), begin(delv), 0.0);
-
-	return realCheck;
-}
-
-void universe::Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
-{
-	auto magp=norm(ball1.pos);
-	upos[3]= {};
-
-	for(i=0; i<size(ball1.pos); i++)
+	auto collideU(auto ball, auto radius)
 	{
-	    upos[i]=upos[i]/magp;
+		// need to finish this line to match ball.pos and
+		// other vectors
+
+		if (ball == {0,0,0})
+		{
+			return 0;
+		}
+		else
+		{
+			auto A = inner_product(begin(ball.vel), end(ball.vel), begin(ball.vel), 0.0);
+			auto B = 2 * inner_product(begin(ball.pos), end(ball.pos), begin(ball.vel), 0.0);
+
+			auto c1 = inner_product(begin(ball.pos), end(ball.pos), begin(ball.pos), 0.0);
+			auto c2 = pow(ball.rad,2);
+			auto C = c1 - c2;
+
+			auto disc = pow(B,2) - (4 * A * C);
+
+			if (A == 0)
+			{
+				return 0;
+			}
+			else
+			{
+				auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
+				auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
+
+				if (t_plus < 0 and t_minus < 0)
+				{
+					return 0;
+				}
+				else if (t_minus < 0)
+				{
+					return t_plus;
+				}
+				else
+				{
+					return t_minus;
+				}
+			}
+		}
 	}
 
-	norm_v=inner_product(begin(ball1.vel), end(ball1.vel), begin(upos), 0.0);
-	tan_v=minus(ball1.vel,norm_v);
-	ball1.vel = minus(tan_v,norm_v);
-	ball1.bounce++;
-	
-	cout<<ball1.name<<" collided with the universe\n";
-	Ball::Print(ball1);
-	cout<<"At time "<<tot_t;
-	
-	for(i=0;i<size(ball_array);i++)
+	void realColl(auto ball1, auto ball2, float t)
 	{
-	    ball_array[i].time=t;
+		vector<double> delv = ball1.vel - ball2.vel;
+		vector<double> vel1_t = t * ball1.vel;
+		vector<double> vel2_t = t * ball2.vel;
+		vector<double> r1 = ball1.pos + vel1_t;
+		vector<double> r2 = ball2.pos + vel2_t;
+		vector<double> delr = r1 - r2;
+
+		auto realCheck = inner_product(begin(delr), end(delr), begin(delv), 0.0);
+
+		return realCheck;
 	}
-	return 0;
-}
 
-void universe::Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto tot_t)
-{
-	p1 = ball1.pos;
-	p2 = ball2.pos;
-	v1 = ball1.vel;
-	v2 = ball2.vel;
-	m1 = ball1.mass;
-	m2 = ball2.mass;
-	
-	vp = vMinus(v1,v2);
-	v_p = vMinus(v2,v1);
-	
-	rp = vMinus(p1,p2);
-	r_p = vMinus(p2,p1);
-	
-	
-	return 0;
-}
+	void Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
+	{
+		auto magp=norm(ball1.pos);
+		upos[3]= {};
 
-void universe::update_pos(auto ball_array)
-{
-	return 0;
-}
+		for(i=0; i<size(ball1.pos); i++)
+		{
+		    upos[i]=upos[i]/magp;
+		}
 
-auto universe::energy(auto ball_array)
-{
-	E_tot=0.0;
-	for (i=0; i<size(ball_array); i++) {
-	E_tot=(.5)*(ball_array[i].mass)*pow(norm(ball_array[i]),2);
+		norm_v=inner_product(begin(ball1.vel), end(ball1.vel), begin(upos), 0.0);
+		tan_v=minus(ball1.vel,norm_v);
+		ball1.vel = minus(tan_v,norm_v);
+		ball1.bounce++;
+		
+		cout<<ball1.name<<" collided with the universe\n";
+		Ball::Print(ball1);
+		cout<<"At time "<<tot_t;
+		
+		for(i=0;i<size(ball_array);i++)
+		{
+		    ball_array[i].time=t;
+		}
+		return 0;
 	}
-	return E_tot;
-}
 
-auto universe::momentum(auto ball_array)
-{
-	return 0;
-}
+	void Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto tot_t)
+	{
+		p1 = ball1.pos;
+		p2 = ball2.pos;
+		v1 = ball1.vel;
+		v2 = ball2.vel;
+		m1 = ball1.mass;
+		m2 = ball2.mass;
+		
+		vp = vMinus(v1,v2);
+		v_p = vMinus(v2,v1);
+		
+		rp = vMinus(p1,p2);
+		r_p = vMinus(p2,p1);
+		
+		
+		return 0;
+	}
+
+	Vec update_pos(auto ball_array)
+	{
+		return 0;
+	}
+
+	auto energy(auto ball_array)
+	{
+		return 0;
+	}
+
+	Vec momentum(auto ball_array)
+	{
+		return 0;
+	}
+};
 
 auto main (auto rad, int maxCol)
 {
