@@ -174,7 +174,28 @@ void universe::Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
 
 void universe::Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto tot_t)
 {
-	return 0;
+    vec p1 = ball_1.pos;
+    vec p2 = ball_2.pos;
+    vec v1 = ball_1.vel;
+    vec v2 = ball_2.vel;
+    double m1 = ball_1.mass;
+    double m2 = ball_2.mass;
+
+    del_v12 = v1-v2;
+    del_v21 = scalarMul(-1, del_p21);
+    del_p12 = p1-p2;
+    del_p21 = scalarMul(-1, del_p21);
+
+    ball1_ratio = 2 * m2/(m1+m2) * (del_v12*del_p12)/(norm(del_p12));
+    ball2_ratio = 2 * m1/(m1+m2) * (del_v21*del_p21)/(norm(del_p21));
+
+    ball1.vec = ball1.vel - scalarMul(ball1_rat,del_p12);
+    ball2.vec = ball2.vel - scalarMul(ball2_rat,del_p21);
+
+    ball1.bounce ++;
+    ball2.bounce ++;
+	
+return 0;
 }
 
 void universe::update_pos(auto ball_array)
