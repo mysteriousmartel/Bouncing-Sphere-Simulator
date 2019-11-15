@@ -167,9 +167,9 @@ void universe::realColl(auto ball1, auto ball2, float t)
 	return realCheck;
 }
 
-void universe::Ucollision(auto ball1, auto ball_array, auto t, auto tot_t)
+void universe::Ucollision(sphere ball1, sphere ball_array, auto t, auto tot_t)
 {
-	return 0;
+	
 }
 
 void universe::Scollision(auto ball1, auto ball2, auto ball_array, auto t, auto tot_t)
@@ -205,7 +205,12 @@ void universe::update_pos(auto ball_array)
 
 auto universe::energy(auto ball_array)
 {
-	return 0;
+	double E_tot = 0.0;
+	for (i=0; i<size(ball.array); i++) {
+		E_tot = (.5) * (ball_array[i].mass) * pow(norm(ball_array[i].vel),2);	
+	}
+	
+	return E_tot;
 }
 
 auto universe::momentum(auto ball_array)
