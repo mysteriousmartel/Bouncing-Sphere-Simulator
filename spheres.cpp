@@ -77,21 +77,13 @@ struct ball()
 			this->vel = vel;
 			this->name = name;
 		}
-
-		BallArray(){}
-
-		BallArray()
-		{
-			// wtf do we put in here, 
-			// i just think we should have this to represent the array
-		}
 };
 
 struct universe()
 {
 	auto radius;
 	auto max_col;
-	list <Ball> ball_array;
+	vector<Ball> ball_array;
 	auto time;
 
 	auto collideS(Ball ball1, Ball ball2)
@@ -199,7 +191,7 @@ struct universe()
 		return realCheck;
 	}
 
-	void Ucollision(Ball ball1, BallArray ball_array, auto t, auto tot_t)
+	void Ucollision(Ball ball1, vector<Ball> ball_array, auto t, auto tot_t)
 	{
 		auto magp=Norm(ball1.pos);
 		Vec upos[3]= {};
@@ -225,7 +217,7 @@ struct universe()
 		return 0;
 	}
 
-	void Scollision(Ball ball1, Ball ball2, BallArray ball_array, auto t, auto tot_t)
+	void Scollision(Ball ball1, Ball ball2, vector<Ball> ball_array, auto t, auto tot_t)
 	{
 		p1 = ball1.pos;
 		p2 = ball2.pos;
@@ -244,17 +236,17 @@ struct universe()
 		return 0;
 	}
 
-	Vec update_pos(BallArray ball_array)
+	Vec update_pos(vector<Ball> ball_array)
 	{
 		return 0;
 	}
 
-	auto energy(BallArray ball_array)
+	auto energy(vector<Ball> ball_array)
 	{
 		return 0;
 	}
 
-	Vec momentum(BallArray ball_array)
+	Vec momentum(vector<Ball> ball_array)
 	{
 		return 0;
 	}
