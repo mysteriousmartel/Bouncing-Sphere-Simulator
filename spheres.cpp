@@ -241,7 +241,11 @@ void universe::update_pos(auto ball_array)
 
 auto universe::energy(auto ball_array)
 {
-	return 0;
+	E_tot=0.0;
+	for (i=0; i<size(ball_array); i++) {
+	E_tot=(.5)*(ball_array[i].mass)*pow(norm(ball_array[i]),2);
+	}
+	return E_tot;
 }
 
 auto universe::momentum(auto ball_array)
