@@ -245,6 +245,10 @@ struct universe()
 
 	Vec update_pos(BallArray ball_array)
 	{
+		for(i=0; i < size(ball_array); i++)
+		{
+			ball_array[i].updatePos(ball_array, ball_array[i].time);
+		}	
 		return 0;
 	}
 
