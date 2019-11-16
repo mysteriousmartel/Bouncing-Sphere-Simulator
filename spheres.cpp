@@ -68,14 +68,15 @@ struct Vec
 
 struct Ball 
 {
-		auto mass, rad;
+		double mass, rad;
 		Vec pos, vel;
 		string name;
-		auto time, bounce;
+		double time;
+		int bounce;
 
 		Ball(){}
 
-		Ball(double mass, double rad, Vec pos, Vec vec, string name)
+		Ball(double mass, double rad, Vec pos, Vec vel, string name)
 		{
 			this->mass = mass;
 			this->rad = rad;
@@ -86,19 +87,27 @@ struct Ball
 			bounce = 0;
 		}
 
-		void updatePos(Ball ball, auto t)
+		void updatePos()
 		{
-			ball.pos = ball.pos + ball.vel.scalarMult(t);
+			pos = pos + vel.scalarMult(time);
 		}
 };
 
 struct universe
 {
-	auto radius;
-	auto max_col;
-	auto time;
+	double radius;
+	int max_col;
+	// double time;
 
-	auto collideS(Ball ball1, Ball ball2)
+	universe(){}
+
+	universe(double radius, int max_col)
+	{
+		this-> radius = radius;
+		this-> max_col = max_col;
+	}
+
+	double collideS(Ball ball1, Ball ball2)
 	{
 		Vec delv = ball1.vel + ball2.vel.scalarMult(-1);
 		Vec delp = ball1.pos + ball2.pos.scalarMult(-1);
@@ -111,7 +120,7 @@ struct universe
 
 		if (A == 0)
 		{
-			return false;
+			return -1;
 		}
 		else
 		{
@@ -119,16 +128,16 @@ struct universe
 
 			if (disc < 0)
 			{
-				return false;
+				return -1;
 			}
 			else
 			{
-				auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
-				auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
+				double t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
+				double t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
 
 				if (t_plus < 0 and t_minus < 0)
 				{
-					return false;
+					return -1;
 				}
 				else if (t_minus < 0)
 				{
@@ -142,44 +151,35 @@ struct universe
 		}
 	}
 
-	char collideU(Ball ball, double radius)
+	double collideU(Ball ball, double radius)
 	{
-		// unsure if this works
+		auto A = ball.vel * ball.vel;
+		auto B = ball.pos.scalarMult(2) * ball.vel;
+		auto c1 = ball.pos * ball.pos;
+		auto c2 = pow(radius-ball.rad,2);
+		auto C = c1 - c2;
+		auto disc = pow(B,2) - (4 * A * C);
 
-		if (all_of(ball.pos == {0,0,0}))
+		if (A == 0)
 		{
-			return false;
+			return -1;
 		}
 		else
 		{
-			auto A = ball.vel * ball.vel;
-			auto B = 2 * ball.pos * ball.vel;
-			auto c1 = ball.pos * ball.pos;
-			auto c2 = pow(ball.rad,2);
-			auto C = c1 - c2;
-			auto disc = pow(B,2) - (4 * A * C);
+			double t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
+			double t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
 
-			if (A == 0)
+			if (t_plus < 0 and t_minus < 0)
 			{
-				return false;
+				return -1;
+			}
+			else if (t_minus < 0)
+			{
+				return t_plus;
 			}
 			else
 			{
-				auto t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
-				auto t_minus = ((-1) * B - sqrt(disc)) / (2 * A);
-
-				if (t_plus < 0 and t_minus < 0)
-				{
-					return false;
-				}
-				else if (t_minus < 0)
-				{
-					return t_plus;
-				}
-				else
-				{
-					return t_minus;
-				}
+				return t_minus;
 			}
 		}
 	}
@@ -200,13 +200,11 @@ struct universe
 
 	void Ucollision(Ball ball1, vector<Ball> ball_array, double t, double tot_t)
 	{
-		auto magp=ball1.pos.Norm();
+		auto magp = ball1.pos.Norm();
 		Vec upos = ball1.pos.scalarMult(1/magp);
 
-		
-
-		norm_v= ball1.vel * upos;
-		tan_v=ball1.vel + norm_v.scalarMult(-1);
+		Vec norm_v = upos.scalarMult(ball1.vel.Norm());
+		Vec tan_v = ball1.vel + norm_v.scalarMult(-1);
 		ball1.vel = tan_v + norm_v.scalarMult(-1);
 		ball1.bounce++;
 
@@ -224,7 +222,7 @@ struct universe
 		
 		
 		
-		for(int i=0;i<size(ball_array);i++)
+		for(int i=0;i<ball_array.size();i++)
 		{
 		    ball_array[i].time=t;
 		}
@@ -232,17 +230,17 @@ struct universe
 
 	void Scollision(Ball ball1, Ball ball2, vector<Ball> ball_array, double t, double tot_t)
 	{
-		Vec p1 = ball_1.pos;
-	    Vec p2 = ball_2.pos;
-	    Vec v1 = ball_1.vel;
-	    Vec v2 = ball_2.vel;
-	    double m1 = ball_1.mass;
-	    double m2 = ball_2.mass;
+		Vec p1 = ball1.pos;
+	    Vec p2 = ball2.pos;
+	    Vec v1 = ball1.vel;
+	    Vec v2 = ball2.vel;
+	    double m1 = ball1.mass;
+	    double m2 = ball2.mass;
 
 	    Vec del_v12 = v1+v2.scalarMult(-1);
-	    Vec del_v21 =  del_p21.scalarMult(-1);
+	    Vec del_v21 =  del_v12.scalarMult(-1);
 	    Vec del_p12 = p1+p2.scalarMult(-1);
-	    Vec del_p21 =  del_p21.scalarMult(-1);
+	    Vec del_p21 =  del_p12.scalarMult(-1);
 
 	    double ball1_ratio = 2 * m2/(m1+m2) * (del_v12*del_p12)/(del_p12.Norm());
 	    double ball2_ratio = 2 * m1/(m1+m2) * (del_v21*del_p21)/(del_p21.Norm());
@@ -250,8 +248,8 @@ struct universe
 	    ball1.vel = ball1.vel + del_p12.scalarMult(-ball1_ratio);
 	    ball2.vel = ball2.vel + del_p21.scalarMult(-ball2_ratio);
 
-	    ball1.bounce++;
-	    ball2.bounce++;
+	    ball1.bounce=ball1.bounce+1;
+	    ball2.bounce= ball2.bounce+1;
 
 	    cout<<"\ntime of event: "<<tot_t<<"\n";
 
@@ -275,14 +273,15 @@ struct universe
 		}
 	}
 
-	void energy(vector<Ball> ball_array)
+	double energy(vector<Ball> ball_array)
 	{
-		tot_E=0.0;
+		double tot_E;
 		for(int i=0;i<ball_array.size();i++)
 		{
-			tot_E += (1/2)*ball_array[i].mass*pow(ball_array[i].vel.Norm(),2);
+			tot_E = tot_E + (1.0/2.0)*ball_array[i].mass*pow(ball_array[i].vel.Norm(),2);
 		}
 		cout<<"energy: "<<tot_E<<"\n";
+		return tot_E;
 	}
 
 	void momentum(vector<Ball> ball_array)
@@ -309,19 +308,21 @@ int main (int argc, char **argv)
 	string name;
 
 	cout << "Please enter the mass, radius, x/y/z position, x/y/z velocity" << "\n";
-	cout << "and name of each sphere"<<"\n"<<"When complete, use EOF / Ctrl-D to stop entering";
+	cout << "and name of each sphere"<<"\n"<<"When complete, use EOF / Ctrl-D to stop entering"<<"\n";
 	while(!cin.eof())
 	{
 		cin>>mass>>radius>>x0>>y0>>x0>>vx>>vy>>vz>>name;
 		Vec pos(x0,y0,z0);
 		Vec vel(vx,vy,vz);
 
-		ball_array.push_back(Ball(mass,radius,name,pos,vel));
+		ball_array.push_back(Ball(mass,radius,pos,vel,name));
 	}
+
+	ball_array.pop_back();
 
 	universe u = universe(univ_rad,univ_coll);
 
-	auto minty = u.collideU(ball_array[0],univ_rad);
+	auto minty = 100000000000; //u.collideU(ball_array[0],univ_rad);
 	vector<int> colliders{0,0};
 
 	cout<<"Here are the initial conditions.\nuniverse radius "<<univ_rad<<"\nmax collisions "
@@ -334,11 +335,14 @@ int main (int argc, char **argv)
 	    ball_array[i].vel[0]<<","<<ball_array[i].vel[1]<<","<<ball_array[i].vel[2]<<") bounces="
 	    <<ball_array[i].bounce<<"\n";
 	}
+	// cout<<ball_array[0].name<<endl;
+	// cout<<ball_array[1].name<<endl;
+	// cout<<ball_array[2].name<<endl;
 	u.energy(ball_array);
 	u.momentum(ball_array);
 	cout<<"\nHere are the events"<<endl;
 
-
+	double t;
 	while (!ball_array.empty())
 	{
 		if (ball_array.size()==1)
@@ -350,27 +354,27 @@ int main (int argc, char **argv)
 		{
 			for (int i=0; i<ball_array.size()-1;i++)
 			{
-				double t = u.collideU(ball_array[i],univ_rad);
-				if (t != false and t<minty)
+				t = u.collideU(ball_array[i],univ_rad);
+				if (t != -1 and t<minty)
 				{
-					if (colliders != (i,-1))
+					if (colliders[0] != i and colliders[1] != (-1) and colliders[0]!=colliders[1])
 					{
 						minty = t;
-						colliders = (i,-1);
+						colliders = {i,-1};
 					}
 				}
 				for (int j=i+1;j<ball_array.size();j++)
 				{
 					t = u.collideS(ball_array[i],ball_array[j]);
-					if (t != false and t < minty)
+					if (t != -1 and t < minty)
 					{
-						if (colliders != (i,j))
+						if (colliders[0] != i and colliders[1] != j and colliders[0] != colliders[1])
 						{
-							collCheck = u.realColl(ball_array[i],ball_array[j],t);
+							double collCheck = u.realColl(ball_array[i],ball_array[j],t);
 							if (collCheck < 0)
 							{
 								minty = t;
-								colliders = (i,j);
+								colliders = {i,j};
 							}
 						}
 					}
@@ -390,36 +394,102 @@ int main (int argc, char **argv)
 			if (ball_array[colliders[0]].bounce == univ_coll)
 			{
 				cout<<"disappear "<<ball_array[colliders[0]].name<<endl;
-				ball_array.erase(colliders[0]);
+				ball_array.erase(ball_array.begin()+colliders[0]);
 			}
 		}
 		else
 		{
 			u.energy(ball_array);
 		    u.momentum(ball_array);
-			u.Scollision(ball_array[colliders[0]], ball_array[colliders[1]], ball_array, minty, totalTime);
+			u.Scollision(ball_array[colliders[0]], ball_array[colliders[1]], ball_array, minty, total_time);
 		    ball_array[colliders[0]].bounce = ball_array[colliders[0]].bounce + 1;
 		    ball_array[colliders[1]].bounce = ball_array[colliders[1]].bounce + 1;
-	      if (ball_array[colliders[0]].bounce > = univ_coll and colliders[1] >= univ_coll)
+	      if (ball_array[colliders[0]].bounce >= univ_coll and colliders[1] >= univ_coll)
 	      {
 	      	cout<<"disappear "<<ball_array[colliders[0]].name<<endl;
 	      	cout<<"disappear "<<ball_array[colliders[1]].name<<endl;
-	      	ball_array.erase(colliders[1]);
-	      	ball_array.erase(colliders[0]);
+	      	ball_array.erase(ball_array.begin()+colliders[1]);
+	      	ball_array.erase(ball_array.begin()+colliders[0]);
 	      }
 	      else if (ball_array[colliders[1]].bounce >= univ_coll)
 	      {
 	      	cout<<"disappear "<<ball_array[colliders[1]].name<<endl;
-	      	ball_array.erase(colliders[1]);
+	      	ball_array.erase(ball_array.begin()+colliders[1]);
 	      }
 	      else if (ball_array[colliders[0]].bounce >= univ_coll)
 	      {
 	      	cout<<"disappear "<<ball_array[colliders[0]].name<<endl;
-	      	ball_array.erase(colliders[0]);
+	      	ball_array.erase(ball_array.begin()+colliders[0]);
 	      }
 		}
 		u.updatePos(ball_array);
 	}
+	
+
+
+
+
+	// while(!ball_array.empty())
+	// {
+	// 	if(ball_array.size()==1)
+	// 	{
+	// 		minty=u.collideU(ball_array[0],univ_rad);
+	// 		colliders = {0,-1};
+	// 	}
+	// 	for(int i=0; i<ball_array.size()-1;i++)
+	// 	{
+	// 		t=u.collideU(ball_array[i],univ_rad);
+	// 		if(t!=-1 and t<minty)
+	// 		{
+	// 			minty = t;
+	// 			colliders={i,-1};
+	// 		}
+	// 		for(int j=i+1; j<ball_array.size();j++)
+	// 		{
+	// 			t=u.collideS(ball_array[i],ball_array[j]);
+	// 			if(t!=-1 and t<minty)
+	// 			{
+	// 				double checker=u.realColl(ball_array[i],ball_array[j],t);
+	// 				if(checker < 0)
+	// 				{
+	// 					minty = t;
+	// 					colliders = {i,j};
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	if(colliders[1]==-1)
+	// 	{
+	// 		u.Ucollision(ball_array[colliders[0]], ball_array, minty, total_time);
+	// 		if(ball_array[colliders[0]].bounce>=univ_coll)
+	// 		{
+	// 			ball_array.erase(ball_array.begin()+colliders[0]);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		u.Scollision(ball_array[colliders[0]],ball_array[colliders[1]], ball_array, minty, total_time);
+	// 		if(ball_array[colliders[0]].bounce>=univ_coll and ball_array[colliders[1]].bounce>=univ_coll)
+	// 		{
+	// 			cout<<"disappear "<<ball_array[colliders[0]].name<<endl;
+	// 	      	cout<<"disappear "<<ball_array[colliders[1]].name<<endl;
+	// 	      	ball_array.erase(ball_array.begin()+colliders[1]);
+	// 	      	ball_array.erase(ball_array.begin()+colliders[0]);
+	// 		}
+	// 		else if(ball_array[colliders[0]].bounce>=univ_coll)
+	// 		{
+	// 			cout<<"disappear "<<ball_array[colliders[0]].name<<endl;
+	//       		ball_array.erase(ball_array.begin()+colliders[0]);
+	// 		}
+	// 		else if(ball_array[colliders[1]].bounce>=univ_coll)
+	// 		{
+	// 			cout<<"disappear "<<ball_array[colliders[1]].name<<endl;
+	//       		ball_array.erase(ball_array.begin()+colliders[1]);
+	// 		}
+	// 	}
+	// 	u.updatePos(ball_array);
+	// }
 	cout<<"Total time for all spheres to vanish: "<<total_time<<endl;
 	return 0.0;
 }
