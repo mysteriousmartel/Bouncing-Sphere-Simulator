@@ -164,6 +164,10 @@ struct universe
 		{
 			return -1;
 		}
+		else if (disc <= 0)
+		{
+			return -1;
+		}
 		else
 		{
 			double t_plus = ((-1) * B + sqrt(disc)) / (2 * A);
